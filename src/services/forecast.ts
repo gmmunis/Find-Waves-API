@@ -56,7 +56,7 @@ export class Forecast {
         lng: beach.lng,
         name: beach.name,
         position: beach.position,
-        rating: 1, //need to be implemented
+        rating: 1,
       },
       ...e,
     }));
