@@ -1,4 +1,3 @@
-
 import { Controller, Post } from '@overnightjs/core';
 import { Request, Response } from 'express';
 import { Beach } from '@src/models/beach';
