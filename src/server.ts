@@ -1,14 +1,18 @@
 import './util/module-alias';
-import bodyParser from 'body-parser';
 import { Server } from '@overnightjs/core';
 import { Application } from 'express';
+import bodyParser from 'body-parser';
+import * as http from 'http';
+import expressPino from 'express-pino-logger';
+import cors from 'cors';
 import { ForecastController } from './controllers/forecast';
+import * as database from '@src/database';
 import { BeachesController } from './controllers/beaches';
 import { UsersController } from './controllers/users';
-import * as database from '@src/database';
 import logger from './logger';
 
 export class SetupServer extends Server {
+  private server?: http.Server;
 
   constructor(private port = 3000) {
     super();
@@ -22,14 +26,19 @@ export class SetupServer extends Server {
 
   private setupExpress(): void {
     this.app.use(bodyParser.json());
-    this.setupControllers();
+    this.app.use(expressPino({ logger, }));
+    this.app.use(cors({ origin: '*', }));
   }
 
   private setupControllers(): void {
     const forecastController = new ForecastController();
     const beachesController = new BeachesController();
     const usersController = new UsersController();
-    this.addControllers([forecastController, beachesController, usersController]);
+    this.addControllers([
+      forecastController,
+      beachesController,
+      usersController,
+    ]);
   }
 
   public getApp(): Application {
@@ -42,10 +51,20 @@ export class SetupServer extends Server {
 
   public async close(): Promise<void> {
     await database.close();
+    if (this.server) {
+      await new Promise<void>((resolve, reject) => {
+        this.server?.close((err) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+    }
   }
 
   public start(): void {
-    this.app.listen(this.port, () => {
+    this.server = this.app.listen(this.port, () => {
       logger.info('Server listening on port: ' + this.port);
     });
   }

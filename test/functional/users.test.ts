@@ -1,4 +1,4 @@
-import { User } from "@src/models/user";
+import { User } from '@src/models/user';
 import AuthService from '@src/services/auth';
 
 describe('Users functional tests', () => {
@@ -14,25 +14,29 @@ describe('Users functional tests', () => {
             };
             const response = await global.testRequest.post('/users').send(newUser);
             expect(response.status).toBe(201);
-            await expect(AuthService.comparePasswords(
-                newUser.password,
-                response.body.password)
+            await expect(
+                AuthService.comparePasswords(newUser.password, response.body.password)
             ).resolves.toBeTruthy();
-            expect(response.body).toEqual(expect.objectContaining(
-                { ...newUser, ...{ password: expect.any(String) } }));
+            expect(response.body).toEqual(
+                expect.objectContaining({
+                    ...newUser,
+                    ...{ password: expect.any(String) },
+                })
+            );
         });
 
-        it('should return 422 when there is a validation error', async () => {
+        it('Should return 422 when there is a validation error', async () => {
             const newUser = {
                 email: 'john@mail.com',
                 password: '1234',
             };
-            const response = (await global.testRequest.post('/users').send(newUser));
+            const response = await global.testRequest.post('/users').send(newUser);
 
             expect(response.status).toBe(422);
             expect(response.body).toEqual({
                 code: 422,
-                error: 'User validation failed: name: Path `name` is required.',
+                error: 'Unprocessable Entity',
+                message: 'User validation failed: name: Path `name` is required.',
             });
         });
 
@@ -48,12 +52,14 @@ describe('Users functional tests', () => {
             expect(response.status).toBe(409);
             expect(response.body).toEqual({
                 code: 409,
-                error: 'User validation failed: email: already exists in the database.',
+                error: 'Conflict',
+                message:
+                    'User validation failed: email: already exists in the database.',
             });
         });
     });
 
-    describe('When authenticating a user', () => {
+    describe('when authenticating a user', () => {
         it('should generate a token for a valid user', async () => {
             const newUser = {
                 name: 'John Doe',
