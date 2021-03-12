@@ -1,27 +1,25 @@
 import { StormGlass } from '@src/clients/stormGlass';
-import { Beach, BeachPosition } from '@src/models/beach';
 import stormGlassNormalizedResponseFixture from '@test/fixtures/stormglass_normalized_response_3_hours.json';
 import { Forecast, ForecastProcessingInternalError } from '../forecast';
+import { Beach, GeoPosition } from '@src/models/beach';
 
 jest.mock('@src/clients/stormGlass');
 
 describe('Forecast Service', () => {
-    const mockedStormGlassService = new StormGlass() as jest.Mocked<StormGlass>
+    const mockedStormGlassService = new StormGlass() as jest.Mocked<StormGlass>;
     it('should return the forecast for a list of beaches', async () => {
         mockedStormGlassService.fetchPoints.mockResolvedValue(
             stormGlassNormalizedResponseFixture
         );
-
         const beaches: Beach[] = [
             {
                 lat: -33.792726,
                 lng: 151.289824,
                 name: 'Manly',
-                position: BeachPosition.E,
+                position: GeoPosition.E,
                 user: 'fake-id',
             },
         ];
-
         const expectedResponse = [
             {
                 time: '2020-04-26T00:00:00+00:00',
@@ -84,10 +82,9 @@ describe('Forecast Service', () => {
                 ],
             },
         ];
-
         const forecast = new Forecast(mockedStormGlassService);
-        const beachesWithReating = await forecast.processForecastForBeaches(beaches);
-        expect(beachesWithReating).toEqual(expectedResponse);
+        const beachesWithRating = await forecast.processForecastForBeaches(beaches);
+        expect(beachesWithRating).toEqual(expectedResponse);
     });
 
     it('should return an empty list when the beaches array is empty', async () => {
@@ -102,7 +99,7 @@ describe('Forecast Service', () => {
                 lat: -33.792726,
                 lng: 151.289824,
                 name: 'Manly',
-                position: BeachPosition.E,
+                position: GeoPosition.E,
                 user: 'fake-id',
             },
         ];
