@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ForecastPoint, StormGlass } from '@src/clients/stormGlass';
 import logger from '@src/logger';
 import { Beach } from '@src/models/beach';
@@ -19,7 +20,8 @@ export class ForecastProcessingInternalError extends InternalError {
 
 
 export class Forecast {
-  constructor(protected stormGlass = new StormGlass(), protected RatingService: typeof Rating = Rating) { }
+  constructor(protected stormGlass = new StormGlass(),
+    protected RatingService: typeof Rating = Rating) { }
 
   public async processForecastForBeaches(
     beaches: Beach[]
@@ -33,7 +35,11 @@ export class Forecast {
         const enrichedBeachData = this.enrichedBeachData(points, beach, rating);
         pointsWithCorrectSources.push(...enrichedBeachData);
       }
-      return this.mapForecastByTime(pointsWithCorrectSources);
+      const timeForecast = this.mapForecastByTime(pointsWithCorrectSources);
+      return timeForecast.map((t) => ({
+        time: t.time,
+        forecast: _.orderBy(t.forecast, ['rating'], ['desc']),
+      }));
     } catch (error) {
       logger.error(error);
       throw new ForecastProcessingInternalError(error.message);
@@ -41,10 +47,10 @@ export class Forecast {
   }
 
   private enrichedBeachData(
-    points: ForecastPoint[], 
+    points: ForecastPoint[],
     beach: Beach,
     rating: Rating
-    ): BeachForecast[] {
+  ): BeachForecast[] {
     return points.map((point) => ({
       ...{},
       ...{
