@@ -48,8 +48,8 @@ describe('Beaches functional tests', () => {
             expect(response.status).toBe(400);
             expect(response.body).toEqual({
                 code: 400,
-                error: 'Unprocessable Entity',
-                message: 'Beach validation failed: lat: Cast to Number failed for value "invalid_string" at path "lat"',
+                error: 'Bad Request',
+                message: 'request.body.lat should be number',
             });
         });
 
