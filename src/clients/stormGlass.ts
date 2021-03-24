@@ -1,6 +1,7 @@
 import { InternalError } from '@src/util/errors/internal-error';
 import config, { IConfig } from 'config';
 import * as HTTPUtil from '@src/util/request';
+import { TimeUtil } from '@src/util/time';
 
 export interface StormGlassPointSource {
     [key: string]: number;
@@ -41,7 +42,7 @@ export class StormGlassUnexpectedResponseError extends InternalError {
 export class ClientRequestError extends InternalError {
     constructor(message: string) {
         const internalMessage =
-            'Unexpected error when trying to communicate to stormGlass';
+            'Unexpected error when trying to communicate to StormGlass';
         super(`${internalMessage}: ${message}`);
     }
 }
@@ -54,8 +55,9 @@ export class StormGlassResponseError extends InternalError {
     }
 }
 
-const stormGlassResourceConfig: IConfig = config.get(
-    'App.resources.StormGlass');
+const stormglassResourceConfig: IConfig = config.get(
+    'App.resources.StormGlass'
+);
 
 export class StormGlass {
     readonly stormGlassAPIParams =
@@ -65,16 +67,16 @@ export class StormGlass {
     constructor(protected request = new HTTPUtil.Request()) { }
 
     public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]> {
-        // console.log(stormGlassResourceConfig);
+        const endTimestamp = TimeUtil.getUnixTimeForAFutureDay(1);
         try {
             const response = await this.request.get<StormGlassForecastResponse>(
-                `${stormGlassResourceConfig.get(
+                `${stormglassResourceConfig.get(
                     'apiUrl'
                 )}/weather/point?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams
-                }&source=${this.stormGlassAPISource}`,
+                }&source=${this.stormGlassAPISource}&end=${endTimestamp}`,
                 {
                     headers: {
-                        Authorization: stormGlassResourceConfig.get('apiToken'),
+                        Authorization: stormglassResourceConfig.get('apiToken'),
                     },
                 }
             );

@@ -6,11 +6,11 @@ import * as HTTPUtil from '@src/util/request';
 jest.mock('@src/util/request');
 
 describe('StormGlass client', () => {
-
+    
     const MockedRequestClass = HTTPUtil.Request as jest.Mocked<
         typeof HTTPUtil.Request
     >;
-
+    
     const mockedRequest = new HTTPUtil.Request() as jest.Mocked<HTTPUtil.Request>;
     it('should return the normalized forecast from the StormGlass service', async () => {
         const lat = -33.792726;
@@ -57,7 +57,7 @@ describe('StormGlass client', () => {
         const stormGlass = new StormGlass(mockedRequest);
 
         await expect(stormGlass.fetchPoints(lat, lng)).rejects.toThrow(
-            'Unexpected error when trying to communicate to stormGlass: Network Error'
+            'Unexpected error when trying to communicate to StormGlass: Network Error'
         );
     });
 
@@ -71,7 +71,7 @@ describe('StormGlass client', () => {
                 data: { errors: ['Rate Limit reached'] },
             },
         });
-
+        
         MockedRequestClass.isRequestError.mockReturnValue(true);
 
         const stormGlass = new StormGlass(mockedRequest);

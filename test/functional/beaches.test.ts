@@ -1,6 +1,6 @@
-import { Beach } from "@src/models/beach";
-import { User } from "@src/models/user";
-import AuthService from "@src/services/auth";
+import { Beach } from '@src/models/beach';
+import { User } from '@src/models/user';
+import AuthService from '@src/services/auth';
 
 describe('Beaches functional tests', () => {
     const defaultUser = {
@@ -8,6 +8,7 @@ describe('Beaches functional tests', () => {
         email: 'john2@mail.com',
         password: '1234',
     };
+
     let token: string;
     beforeEach(async () => {
         await Beach.deleteMany({});
@@ -15,6 +16,7 @@ describe('Beaches functional tests', () => {
         const user = await new User(defaultUser).save();
         token = AuthService.generateToken(user.toJSON());
     });
+
     describe('When creating a new beach', () => {
         it('should create a beach with success', async () => {
             const newBeach = {
@@ -28,12 +30,11 @@ describe('Beaches functional tests', () => {
                 .post('/beaches')
                 .set({ 'x-access-token': token })
                 .send(newBeach);
-
             expect(response.status).toBe(201);
             expect(response.body).toEqual(expect.objectContaining(newBeach));
         });
 
-        it('should return validation error', async () => {
+        it('should return validation error when a field is invalid', async () => {
             const newBeach = {
                 lat: 'invalid_string',
                 lng: 151.289824,
@@ -44,7 +45,6 @@ describe('Beaches functional tests', () => {
                 .post('/beaches')
                 .set({ 'x-access-token': token })
                 .send(newBeach);
-
             expect(response.status).toBe(400);
             expect(response.body).toEqual({
                 code: 400,
@@ -54,6 +54,7 @@ describe('Beaches functional tests', () => {
         });
 
         it.skip('should return 500 when there is any error other than validation error', async () => {
+            //TODO think in a way to throw a 500
         });
     });
 });
