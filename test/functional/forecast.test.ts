@@ -4,6 +4,7 @@ import stormGlassWeather3HoursFixture from '../fixtures/stormglass_weather_3_hou
 import apiForecastResponse1BeachFixture from '../fixtures/api_forecast_response_1_beach.json';
 import { User } from '@src/models/user';
 import AuthService from '@src/services/auth';
+import CacheUtil from '@src/util/cache';
 
 describe('Beach forecast functional tests', () => {
   const defaultUser: User = {
@@ -24,8 +25,10 @@ describe('Beach forecast functional tests', () => {
       userId: user.id,
     };
     await new Beach(defaultBeach).save();
-    token = AuthService.generateToken(user.toJSON());
+    token = AuthService.generateToken(user.id);
+    CacheUtil.clearAllCache();
   });
+
   it('should return a forecast with just a few times', async () => {
     nock('https://api.stormglass.io:443', {
       encodedQueryParams: true,
@@ -63,7 +66,8 @@ describe('Beach forecast functional tests', () => {
       .query({ lat: '-33.792726', lng: '151.289824' })
       .replyWithError('Something went wrong');
 
-    const { status } = await global.testRequest.get(`/forecast`)
+    const { status } = await global.testRequest
+      .get(`/forecast`)
       .set({ 'x-access-token': token });
 
     expect(status).toBe(500);
